@@ -20,6 +20,8 @@ public:
     SmartBot();
     Dot hit() override;
     void reset();
+    void setResult(CELL::SHOTRESULTS result, const Dot& shot);
+    void reset();
     
 private:
     Dot randomShot(); //генерим случ коорд 

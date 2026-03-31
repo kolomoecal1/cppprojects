@@ -1,5 +1,8 @@
 #pragma once
+<<<<<<< HEAD
 #include "my_types.h"
+=======
+>>>>>>> a3e9ffe8e624005a82bf546d7cfe44ca4e4b391f
 #include "smart_bot.h"
 #include <algorithm>
 #include <cstdlib>
@@ -47,6 +50,7 @@ Dot SmartBot::randomShot() // генерируем случайные значения
 	return result;
 }
 
+<<<<<<< HEAD
 void SmartBot::updateStateAfterHit()
 {
 	if (state == State::RANDOM)
@@ -66,6 +70,19 @@ void SmartBot::updateStateAfterHit()
 	}
 }
 void  SmartBot::setResults(CELL::SHOTRESULTS shotres)
+=======
+Dot SmartBot::searchAround(const Dot& dot)
+{
+	std::vector(Dir) dirs = { {-1 ,0}, {1, 0}, {0, -1}, {0, 1} };
+}
+for (int i = 0; i < 4; i++)
+{
+	int j = rand() % 4;
+	std::swap(dirs[i], dirs[j])
+}
+
+void setResults(CELL::SHOTRESULTS shotres)
+>>>>>>> a3e9ffe8e624005a82bf546d7cfe44ca4e4b391f
 {
 	switch (shotres)
 	{

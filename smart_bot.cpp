@@ -1,6 +1,6 @@
-#pragma once
+
+#include "my_types.h"
 #include "smart_bot.h"
-<<<<<<< HEAD
 #include <algorithm>
 #include <cstdlib>
 #include <vector>
@@ -19,12 +19,12 @@ Dot SmartBot::hit()
 		}
 		case State::HIT:
 		{
-			if (!task.empty()) // счастье какое, попали
+			if (!task.empty()) 
 			{
 				result = task.back();
 				task.pop_back();
 			}
-			else // пусто, сначала ищем вокруг последнего попадания или возв. к случ.
+			else  
 			{
 				result = searchAround(lastHit);
 				if (result.first == -1)
@@ -40,24 +40,32 @@ Dot SmartBot::hit()
 
 
 
-Dot SmartBot::randomShot() // генерируем случайные значения
+Dot SmartBot::randomShot() 
 {
 	Dot result;
 	result = { rand() % FIELD::SIZE, rand() % FIELD::SIZE };
 	return result;
 }
 
-Dot SmartBot::searchAround(const Dot& dot)
+void SmartBot::updateStateAfterHit()
 {
-	std::vector(Dir) dirs = { {-1 ,0}, {1, 0}, {0, -1}, {0, 1} };
-}
-for (int i = 0; i < 4; i++)
-{
-	int j = rand() % 4;
-	std::swap(dirs[i], dirs[j])
-}
+	if (state == State::RANDOM)
+	{
+		state = State::HIT;
+		for (auto dir : FIELD::dirs)
+		{
+			Dot next = { lastHit.first + dir.first, lastHit.second + dir.second };
+			task.push_back(next);
+		}
+		
+	}
+	else
+	{
+		Dot forward = { lastHit.first + currentDir.first, lastHit.second + currentDir.second };
 
-void setResults(CELL::SHOTRESULTS shotres)
+	}
+}
+void  SmartBot::setResults(CELL::SHOTRESULTS shotres)
 {
 	switch (shotres)
 	{
@@ -83,11 +91,3 @@ void setResults(CELL::SHOTRESULTS shotres)
 		}
 	}
 }
-=======
-
-
-
-class SmartBot : public Bot {
-	Dot hit() override;
-};
->>>>>>> a19bc8c (Flat Arch implemented, NEED TO WRITE SMART BOT)

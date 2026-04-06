@@ -1,7 +1,6 @@
 #pragma once
 #include "bot.h"
 
-<<<<<<< HEAD
 class SmartBot : public Bot 
 {
 private:
@@ -21,17 +20,11 @@ public:
     SmartBot();
     Dot hit() override;
     void reset();
-    
+
 private:
-    Dot randomShot(); //генерим случ коорд 
+    Dot randomShot(); //генерим случ коорд
     Dot searchAround(const Dot& dot); //ищет случайную неиспольз. клетку из четырех вокруг той, в которой попали по кораблю
     void updateStateAfterMiss(); // обновить бот после промаха, снова рандом. или если он попал а вотрой раз не попал, должен следующий раз сменить направление выстрела
     void updateStateAfterHit(const Dot& hit); // что делаем после попадания, стратегия след выстрела
     Dot getNextDirection(); // возвращает следующее направление по кругу вверх - вправо - вниз - влево
-=======
-
-
-class SmartBot : public Bot {
-	Dot hit() override;
->>>>>>> a19bc8c (Flat Arch implemented, NEED TO WRITE SMART BOT)
 };

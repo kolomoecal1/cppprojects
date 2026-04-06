@@ -4,19 +4,16 @@
 typedef std::pair<int, int> Dot;
 typedef std::pair<int, int> Dir;
 typedef std::vector<std::vector<int>> Field;
-
+typedef std::vector<std::pair<int, int>> Ship;
 
 namespace CELL {
-<<<<<<< HEAD
 	enum SHOTRESULTS
 	{
-		INVALID, // в ту же клетку, за пределы поля и тд
-		MISS, // не попали по кораблю
-		HIT, // попали
-		SINK, //потопили
+		INVALID, // пїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ
+		MISS, // пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		HIT, // пїЅпїЅпїЅпїЅпїЅпїЅ
+		SINK, //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	};
-=======
->>>>>>> a19bc8c (Flat Arch implemented, NEED TO WRITE SMART BOT)
 	enum CELL
 	{
 		EMPTY,

@@ -5,8 +5,9 @@
 class Ship
 {
 protected:
-    std::vector<Dot> positions;
+    
 public:
+    std::vector<Dot> positions;
     Ship();
     Ship(int size, Dot first, Dir dir);
 };

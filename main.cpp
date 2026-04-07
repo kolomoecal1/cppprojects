@@ -27,7 +27,7 @@ struct GameState
     {
         playerField = Field(BOARD_SIZE, std::vector<int>(BOARD_SIZE, CELL::EMPTY));
         botField = Field(BOARD_SIZE, std::vector<int>(BOARD_SIZE, CELL::EMPTY));
-        placingShips = true;
+        placingShips = true; 
         isPlayerTurn = true;
         gameOver = false;
         message = "Ходи!";
@@ -156,12 +156,33 @@ bool PlaceShipOnField(Field& field, const Ship& ship)
 // корабли бота
 void PlaceBotShips(Field& field)
 {
-
+    std::vector<int> shipSizes = { 4, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
+    for (int size : shipSizes)
+    {
+        bool placed;
+        while (!placed)
+        {
+            int direction = rand() % 4;
+            int row = rand() % BOARD_SIZE;
+            int col = rand() % BOARD_SIZE;
+            Ship ship(size, Dot{ row, col }, FIELD::dirs[direction]);
+            
+            if (PlaceShipOnField(field, ship))
+            {
+                 placed = true;
+            }
+        }
+    }
 }
 // Проверка выстрела
 bool CheckShot(Field& field, const Dot& shot, CELL::SHOTRESULTS& result)
 {
-
+    int row = shot.first;
+    int col = shot.second;
+    if (field[row][col] == CELL::MISSED || CELL::HITED || CELL::SINKED)
+    {
+        result = CELL::INVALID;
+    }
 }
 void GameLoop()
 {

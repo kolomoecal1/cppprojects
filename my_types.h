@@ -9,10 +9,10 @@ typedef std::vector<std::pair<int, int>> Ship;
 namespace CELL {
 	enum SHOTRESULTS
 	{
-		INVALID, // � �� �� ������, �� ������� ���� � ��
-		MISS, // �� ������ �� �������
-		HIT, // ������
-		SINK, //��������
+		INVALID, 
+		MISS, 
+		HIT, 
+		SINK, 
 	};
 	enum CELL
 	{

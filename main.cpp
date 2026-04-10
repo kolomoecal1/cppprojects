@@ -2,7 +2,7 @@
 #include <utility>
 #include <vector>
 #include <iostream>
-#include <cstdlib>
+#include <cstdlib>  
 #include <ctime>
 #include "simple_bot.h"
 #include "smart_bot.h"
@@ -119,10 +119,14 @@ bool IsValidPlacement(const Field& field, const Ship& ship)
         int col = ship.positions[i].second;
 
         if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE)
+        {
             return false;
+        }
 
         if (field[row][col] != CELL::EMPTY)
+        {
             return false;
+        }
 
         for (int dr = -1; dr <= 1; dr++)
         {
@@ -159,108 +163,126 @@ void PlaceBotShips(Field& field)
     std::vector<int> shipSizes = { 4, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
     for (int size : shipSizes)
     {
-        bool placed;
+        bool placed = false;
         while (!placed)
         {
             int direction = rand() % 4;
             int row = rand() % BOARD_SIZE;
             int col = rand() % BOARD_SIZE;
-            Ship ship(size, Dot{ row, col }, FIELD::dirs[direction]);
-            
-            if (PlaceShipOnField(field, ship))
+
+            Ship ship;
+            for (int i = 0; i < size; i++)
             {
-                 placed = true;
+                ship.push_back({ row + FIELD::dirs[direction].first * i, col + FIELD::dirs[direction].second * i });
+            }
+
+            if (IsValidPlacement(field, ship))
+            {
+                PlaceShipOnField(field, ship);
+                placed = true;
             }
         }
     }
 }
-// Проверка выстрела
+//проверка выстрела
 bool CheckShot(Field& field, const Dot& shot, CELL::SHOTRESULTS& result)
 {
     int row = shot.first;
     int col = shot.second;
-    if (field[row][col] == CELL::MISSED || CELL::HITED || CELL::SINKED)
+    
+    //выход за границы
+    if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE)
     {
         result = CELL::INVALID;
+        return false;
     }
+    
+    int cell = field[row][col];
+    
+    // уже стреляли
+    if (cell == CELL::MISSED || cell == CELL::HITED || cell == CELL::SINKED)
+    {
+        result = CELL::INVALID;
+        return false;
+    }
+    
+    //попадание или промах
+    if (cell == CELL::PLACED)
+    {
+        field[row][col] = CELL::HITED;
+        result = CELL::HIT;
+        return true;
+    }
+    
+    field[row][col] = CELL::MISSED;
+    result = CELL::MISS;
+    return false;
 }
+// создание корабля
+Ship MakeShip(const Dot& start, FIELD::Directions dir, int size)
+{
+    Ship ship;
+    for (int i = 0; i < size; i++)
+    ship.push_back({ start.first + FIELD::dirs[dir].first * i, start.second + FIELD::dirs[dir].second * i });
+    return ship;
+}
+
 void GameLoop()
 {
     std::vector<int> shipSizes = { 4, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
-    int sizeIdX = 0;
+    int shipIndex = 0;
     Dot MouseDot;
     FIELD::Directions dir = FIELD::Directions::RIGHT;
     GameState game;
 
     while (!WindowShouldClose() && !game.gameOver)
     {
-        if (game.placingShips && sizeIdX < shipSizes.size())
+        //расстановка кораблей
+        if (game.placingShips && shipIndex < (int)shipSizes.size())
         {
             if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+                dir = (dir == FIELD::Directions::RIGHT) ? FIELD::Directions::DOWN : FIELD::Directions::RIGHT;
+
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                if (dir == FIELD::Directions::RIGHT)
-                    dir = FIELD::Directions::DOWN;
-                else
-                    dir = FIELD::Directions::RIGHT;
+                Dot start = GetMouseCell(50, 50);
+                if (start.first != -1)
+                {
+                    Ship newShip = MakeShip(start, dir, shipSizes[shipIndex]);
+                    if (PlaceShipOnField(game.playerField, newShip))
+                    {
+                        shipIndex++;
+                        if (shipIndex >= (int)shipSizes.size())
+                        {
+                            game.placingShips = false;
+                            game.message = "Ваш ход!";
+                        }
+                    }
+                }
             }
         }
+        //игра
+        else if (!game.placingShips && !game.gameOver)
+        {
+            //ход игрока
+            if (game.isPlayerTurn && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                
+            }
+            //ход бота
+            else if (!game.isPlayerTurn)
+            {
+
+            }
+
+        }
+
+
     }
 }
-//int CheckHit(int mouseX, int mouseY)
-//{
-//    for (int i = 0; i < positions.size(); i++)
-//    {
-//        int rectX = positions[i].first * CELL_SIZE;
-//        int rectY = positions[i].second * CELL_SIZE;
-//
-//        if (mouseX >= rectX && mouseX <= rectX + CELL_SIZE &&
-//            mouseY >= rectY && mouseY <= rectY + CELL_SIZE)
-//        {
-//            return i;
-//        }
-//    }
-//    return -1;
-//}
 
-#include <cstdlib>
 int main(void)
 {
-    srand(time(NULL));
-    std::cout << rand() % 10 << std::endl;
-    std::cout << rand() % 10 << std::endl;
-    std::cout << rand() % 10 << std::endl;
-    std::cout << rand() % 10 << std::endl;
-    std::cout << rand() % 10 << std::endl;
-    std::cout << rand() % 10 << std::endl;
-    std::cout << rand() % 10 << std::endl;
-
-
-    //InitWindow(800, 450, "raylib [core] example - basic window");
-    //SetTargetFPS(1);
-    //bool isgot = false;
-    //while (!WindowShouldClose())
-    //{
-
-    //    BeginDrawing();
-    //    ClearBackground(RAYWHITE);
-    //    if (isgot == false)
-    //    {
-    //        DrawRectangle(100, 100, 200, 200, BLUE);
-    //    }
-    //    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    //    {
-    //        int MouseX = GetMouseX();
-    //        int MouseY = GetMouseY();
-    //        if (MouseX >= 100 && MouseX <= 300 && MouseY >= 100 && MouseY <= 300)
-    //        {
-    //            isgot = true;
-    //        }
-    //    }
-
-    //    EndDrawing();
-    //}
-
-    //CloseWindow();
 
     return 0;
 }

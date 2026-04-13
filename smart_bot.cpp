@@ -47,7 +47,7 @@ Dot SmartBot::randomShot()
 	return result;
 }
 
-void SmartBot::updateStateAfterHit()
+void SmartBot::updateStateAfterHit(const Dot&hit)
 {
 	if (state == State::RANDOM)
 	{

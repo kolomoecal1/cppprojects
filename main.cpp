@@ -39,9 +39,9 @@ void DrawGrid(int startX, int startY); // отрисовка сетки
 void DrawShips(const Field& field, int startX, int startY); // отрисовка кораблей
 void DrawHits(const Field& field, int startX, int startY); // отрисовка попаданий и промахов напримор Х и О
 Dot GetMouseCell(int startX, int startY); // по координатам мыши в какую клетку кликнули
-bool PlaceShipOnField(Field& field, const Ship& ship); // размещение
-bool IsValidPlacement(const Field& field, const Ship& ship); // можно ли вообще разместить
-void PlaceBotShips(Field& field); // размещение всех 10 кораблей для бота
+bool PlaceShipOnField(Field& field, const Ship& ship); //размещение
+bool IsValidPlacement(const Field& field, const Ship& ship); //можно ли вообще разместить
+void PlaceBotShips(Field& field); //размещение всех 10 кораблей для бота
 bool CheckShot(Field& field, const Dot& shot, CELL::SHOTRESULTS& result); //проверка выстрела
 void MarkSink(Field& field, const Dot& hit); // отметим клетки вокруг потопленного корабля
 void GameLoop();// основной цикл
@@ -92,6 +92,7 @@ void DrawHits(const Field& field, int startX, int startY)
         }
     }
 }
+
 // написав промежут. функции отрисовки, рисуем все сразу
 void DrawBoard(const Field& field, int startX, int startY, bool showShips)
 {
@@ -170,11 +171,7 @@ void PlaceBotShips(Field& field)
             int row = rand() % BOARD_SIZE;
             int col = rand() % BOARD_SIZE;
 
-            Ship ship;
-            for (int i = 0; i < size; i++)
-            {
-                ship.push_back({ row + FIELD::dirs[direction].first * i, col + FIELD::dirs[direction].second * i });
-            }
+            Ship ship(size, Dot{row, col}, FIELD::dirs[direction]);
 
             if (IsValidPlacement(field, ship))
             {
@@ -218,14 +215,6 @@ bool CheckShot(Field& field, const Dot& shot, CELL::SHOTRESULTS& result)
     result = CELL::MISS;
     return false;
 }
-// создание корабля
-Ship MakeShip(const Dot& start, FIELD::Directions dir, int size)
-{
-    Ship ship;
-    for (int i = 0; i < size; i++)
-    ship.push_back({ start.first + FIELD::dirs[dir].first * i, start.second + FIELD::dirs[dir].second * i });
-    return ship;
-}
 
 void GameLoop()
 {
@@ -235,46 +224,65 @@ void GameLoop()
     FIELD::Directions dir = FIELD::Directions::RIGHT;
     GameState game;
 
-    while (!WindowShouldClose() && !game.gameOver)
+    while (!WindowShouldClose() && game.placingShips)
     {
         //расстановка кораблей
-        if (game.placingShips && shipIndex < (int)shipSizes.size())
+        if (shipIndex >= (int)shipSizes.size())
         {
-            if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-                dir = (dir == FIELD::Directions::RIGHT) ? FIELD::Directions::DOWN : FIELD::Directions::RIGHT;
+            game.placingShips = false;
+            continue;
+        }
+        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+            dir = (dir == FIELD::Directions::RIGHT) ? FIELD::Directions::DOWN : FIELD::Directions::RIGHT;
 
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            Dot start = GetMouseCell(50, 50);
+            if (start.first == -1)
+            {
+                continue;
+            }
+            Ship newShip(shipSizes[shipIndex], start, FIELD::dirs[dir]);
+
+            if (!PlaceShipOnField(game.playerField, newShip))
+            {
+                continue;
+            }
+            shipIndex++;
+            
+        }
+    }
+    while (!WindowShouldClose() && !game.gameOver)
+    {
+        //ход игрока
+
+        if (game.isPlayerTurn)
+        {
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                Dot start = GetMouseCell(50, 50);
-                if (start.first != -1)
+                Dot shot = GetMouseCell(50 + BOARD_SIZE * CELL_SIZE + 100, 50);
+                CELL::SHOTRESULTS shotresult;
+                CheckShot(game.botField, shot, shotresult);
+                if (shotresult == CELL::SHOTRESULTS::HIT)
                 {
-                    Ship newShip = MakeShip(start, dir, shipSizes[shipIndex]);
-                    if (PlaceShipOnField(game.playerField, newShip))
-                    {
-                        shipIndex++;
-                        if (shipIndex >= (int)shipSizes.size())
-                        {
-                            game.placingShips = false;
-                            game.message = "Ваш ход!";
-                        }
-                    }
+                    game.botField[shot.first][shot.second] = CELL::HITED;
+                
+                }
+                if (shotresult == CELL::SHOTRESULTS::MISS)
+                {
+                    game.botField[shot.first][shot.second] = CELL::MISSED;
+                }
+                
+                if (shotresult == CELL::SHOTRESULTS::SINK)
+                {
+                    // здесь сложнее, не только отметить потопление , но и отметить клетки вокруг, можно отдельно выдать функцию
                 }
             }
         }
-        //игра
-        else if (!game.placingShips && !game.gameOver)
+        //ход бота
+        else if (!game.isPlayerTurn)
         {
-            //ход игрока
-            if (game.isPlayerTurn && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-            {
-                
-            }
-            //ход бота
-            else if (!game.isPlayerTurn)
-            {
-
-            }
-
+            
         }
 
 

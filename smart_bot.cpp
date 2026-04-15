@@ -37,7 +37,13 @@ Dot SmartBot::hit()
 		}
 	}
 }
-
+//
+//
+//
+// Замена на новый с 15.4.26 !!!!!!!!!!!
+//
+//
+//
 
 
 Dot SmartBot::randomShot() 

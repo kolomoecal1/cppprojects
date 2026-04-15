@@ -22,7 +22,7 @@ struct GameState
     bool gameOver;
     std::string message;
     bool placingShips;
-
+    
     GameState()
     {
         playerField = Field(BOARD_SIZE, std::vector<int>(BOARD_SIZE, CELL::EMPTY));
@@ -215,6 +215,26 @@ bool CheckShot(Field& field, const Dot& shot, CELL::SHOTRESULTS& result)
     result = CELL::MISS;
     return false;
 }
+// проверка каждого на существование
+bool IsShipSunk(Field& field, const Dot& hit, std::vector<Ship>& ships)
+{
+    int row = hit.first;
+    int col = hit.second;
+
+    for (Ship ship : ships)
+    {
+        bool flag = false;
+        for (Dot dot : ship.positions)
+        {
+            if (dot.first == row && dot.second == col)
+            {
+                flag = true;
+            }
+            flag = false;
+        }
+    }
+
+}
 
 void GameLoop()
 {
@@ -223,6 +243,7 @@ void GameLoop()
     Dot MouseDot;
     FIELD::Directions dir = FIELD::Directions::RIGHT;
     GameState game;
+    std::vector<Ship> ships (shipSizes.size());
 
     while (!WindowShouldClose() && game.placingShips)
     {
@@ -248,8 +269,8 @@ void GameLoop()
             {
                 continue;
             }
+            ships[shipIndex] = newShip;
             shipIndex++;
-            
         }
     }
     while (!WindowShouldClose() && !game.gameOver)
@@ -279,6 +300,54 @@ void GameLoop()
                 }
             }
         }
+        if (game.isPlayerTurn)
+        {
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                Dot shot = GetMouseCell(50 + BOARD_SIZE * CELL_SIZE + 100, 50);
+                if (shot.first != -1)  // проверка, что кликнули по полю
+                {
+                    // проверка, не стреляли ли уже в эту клетку
+                    int cell = game.botField[shot.first][shot.second];
+                    if (cell != CELL::HITED && cell != CELL::MISSED && cell != CELL::SINKED)
+                    {
+                        CELL::SHOTRESULTS shotresult;
+                        bool hit = CheckShot(game.botField, shot, shotresult);
+
+                        if (shotresult == CELL::SHOTRESULTS::HIT)
+                        {
+                            game.botField[shot.first][shot.second] = CELL::HITED;
+                            game.message = "ПОПАДАНИЕ! Еще ход!";
+
+                            // проверка победы
+                            bool win = true;
+                            for (int i = 0; i < BOARD_SIZE && win; i++)
+                            {
+                                for (int j = 0; j < BOARD_SIZE && win; j++)
+                                {
+                                    if (game.botField[i][j] == CELL::PLACED)
+                                    {
+                                        win = false;
+                                    }
+                                }
+                            }
+                            if (win)
+                            {
+                                game.gameOver = true;
+                                game.message = "ВЫ ПОБЕДИЛИ!";
+                            }
+                            // игрок продолжает ход 
+                        }
+                        else if (shotresult == CELL::SHOTRESULTS::MISS)
+                        {
+                            game.botField[shot.first][shot.second] = CELL::MISSED;
+                            game.message = "ПРОМАХ! Ход бота";
+                            game.isPlayerTurn = false;
+                        }
+                    }
+                }
+            }
+            }
         //ход бота
         else if (!game.isPlayerTurn)
         {

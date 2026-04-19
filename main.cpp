@@ -2,7 +2,8 @@
 #include <utility>
 #include <vector>
 #include <iostream>
-#include <cstdlib>  
+#include <cstdlib> 
+#include <string>
 #include <ctime>
 #include "simple_bot.h"
 #include "smart_bot.h"
@@ -45,6 +46,9 @@ void PlaceBotShips(Field& field); //размещение всех 10 кораб�
 bool CheckShot(Field& field, const Dot& shot, CELL::SHOTRESULTS& result); //проверка выстрела
 void MarkSink(Field& field, const Dot& hit); // отметим клетки вокруг потопленного корабля
 void GameLoop();// основной цикл
+bool CheckVictory(const Field& field);
+bool IsShipSunk(const Field& field, const Dot& hit, const std::vector<Ship>& ships);
+void MarkShipAsSunk(Field& field, const std::vector<Ship>& ships, const Dot& hit);
 
 
 // рисуем сетку
@@ -216,150 +220,302 @@ bool CheckShot(Field& field, const Dot& shot, CELL::SHOTRESULTS& result)
     return false;
 }
 // проверка каждого на существование
-bool IsShipSunk(Field& field, const Dot& hit, std::vector<Ship>& ships)
+bool IsShipSunk(const Field& field, const Dot& hit, const std::vector<Ship>& ships)
 {
     int row = hit.first;
     int col = hit.second;
 
-    for (Ship ship : ships)
+    const Ship* hitShip = nullptr;
+    for (const auto& ship : ships)
     {
-        bool flag = false;
-        for (Dot dot : ship.positions)
+        for (const auto& pos : ship.positions)
         {
-            if (dot.first == row && dot.second == col)
+            if (pos.first == row && pos.second == col)
             {
-                flag = true;
+                hitShip = &ship;
+                break;
             }
-            flag = false;
+        }
+        if (hitShip) break;
+    }
+    if (!hitShip) return false;
+
+    for (const auto& pos : hitShip->positions)
+    {
+        if (field[pos.first][pos.second] == CELL::PLACED)
+        {
+            return false; 
         }
     }
 
+    return true; 
+}
+void MarkShipAsSunk(Field& field, const std::vector<Ship>& ships, const Dot& hit)
+{
+    const Ship* sunkShip = nullptr;
+    for (const auto& ship : ships)
+    {
+        for (const auto& pos : ship.positions)
+        {
+            if (pos.first == hit.first && pos.second == hit.second)
+            {
+                sunkShip = &ship;
+                break;
+            }
+        }
+        if (sunkShip) break;
+    }
+
+    if (!sunkShip) return;
+
+    // отмечаем SINKED
+    for (const auto& pos : sunkShip->positions)
+    {
+        field[pos.first][pos.second] = CELL::SINKED;
+    }
+
+    // отмечаем  MISSED вокруг этого корабля
+    for (const auto& pos : sunkShip->positions)
+    {
+        for (int dr = -1; dr <= 1; dr++)
+        {
+            for (int dc = -1; dc <= 1; dc++)
+            {
+                int nr = pos.first + dr;
+                int nc = pos.second + dc;
+                if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE)
+                {
+                    if (field[nr][nc] == CELL::EMPTY)
+                    {
+                        field[nr][nc] = CELL::MISSED;
+                    }
+                }
+            }
+        }
+    }
+}
+bool CheckVictory(const Field& field)
+{
+    for (int i = 0; i < BOARD_SIZE; i++)
+    {
+        for (int j = 0; j < BOARD_SIZE; j++)
+        {
+            if (field[i][j] == CELL::PLACED)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
+void DrawPlacementPhase(const Field& playerField, int shipIndex, int totalShips, FIELD::Directions dir, const std::vector<int>& shipSizes)
+{
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    DrawText("РАССТАНОВКА КОРАБЛЕЙ", WINDOW_WIDTH / 2 - 150, 10, 20, DARKBLUE);
+    DrawBoard(playerField, 50, 50, true);
+
+    DrawRectangle(0, WINDOW_HEIGHT - 80, WINDOW_WIDTH, 80, LIGHTGRAY);
+
+    if (shipIndex < totalShips)
+    {
+        std::string hint;
+
+        if (dir == FIELD::Directions::RIGHT)
+        {
+            hint = "Корабль размером " + std::to_string(shipSizes[shipIndex]) + " | Направление: вправо (ПКМ для смены)";
+        }
+        else
+        {
+            hint = "Корабль размером " + std::to_string(shipSizes[shipIndex]) + " | Направление: вниз (ПКМ для смены)";
+        }
+        DrawText(hint.c_str(), 50, WINDOW_HEIGHT - 55, 20, DARKGREEN);
+
+        std::string remaining = "Осталось кораблей: " + std::to_string(totalShips - shipIndex);
+        DrawText(remaining.c_str(), 50, WINDOW_HEIGHT - 30, 20, DARKGREEN);
+    }
+
+    EndDrawing();
+}
+void ProcessPlayerShot(GameState& game)
+{
+    Dot shot = GetMouseCell(50 + BOARD_SIZE * CELL_SIZE + 100, 50);
+    if (shot.first == -1)
+    {
+        return;
+    }
+
+    int cell = game.botField[shot.first][shot.second];
+    if (cell == CELL::HITED || cell == CELL::MISSED || cell == CELL::SINKED)
+    {
+        return;
+    }
+
+    CELL::SHOTRESULTS shotresult;
+    bool hit = CheckShot(game.botField, shot, shotresult);
+
+    if (hit)
+    {
+        game.message = "ПОПАДАНИЕ! Еще ход!";
+        if (CheckVictory(game.botField))
+        {
+            game.gameOver = true;
+            game.message = "ВЫ ПОБЕДИЛИ!";
+        }
+    }
+    else
+    {
+        game.message = "ПРОМАХ! Ход бота";
+        game.isPlayerTurn = false;
+    }
+}
+void ProcessBotShot(GameState& game, const std::vector<Ship>& playerShips)
+{
+    Dot shot = game.bot->hit();
+
+    if (shot.first == -1)
+    {
+        return;
+    }
+
+    CELL::SHOTRESULTS shotresult;
+    bool hit = CheckShot(game.playerField, shot, shotresult);
+
+    game.bot->setResults(shotresult);
+
+    if (hit)
+    {
+        game.message = "БОТ ПОПАЛ!";
+
+        if (IsShipSunk(game.playerField, shot, playerShips))
+        {
+            MarkShipAsSunk(game.playerField, playerShips, shot);
+            game.message = "БОТ ПОТОПИЛ КОРАБЛЬ! ";
+        }
+
+        if (CheckVictory(game.playerField))
+        {
+            game.gameOver = true;
+            game.message = "БОТ ПОБЕДИЛ!";
+        }
+        else
+        {
+            game.message = game.message + "Он стреляет еще раз";
+        }
+    }
+    else
+    {
+        game.message = "БОТ ПРОМАХНУЛСЯ! Ваш ход";
+        game.isPlayerTurn = true;
+    }
+}
+void DrawGamePhase(const GameState& game)
+{
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    DrawText("ВАШЕ ПОЛЕ", 50, 20, 20, DARKBLUE);
+    DrawText("ПОЛЕ БОТА", 50 + BOARD_SIZE * CELL_SIZE + 100, 20, 20, DARKBLUE);
+
+    DrawBoard(game.playerField, 50, 50, true);
+    DrawBoard(game.botField, 50 + BOARD_SIZE * CELL_SIZE + 100, 50, false);
+
+    DrawRectangle(0, WINDOW_HEIGHT - 80, WINDOW_WIDTH, 80, LIGHTGRAY);
+    DrawText(game.message.c_str(), 50, WINDOW_HEIGHT - 55, 25, DARKBLUE);
+
+    if (!game.gameOver)
+    {
+        if (game.isPlayerTurn)
+        {
+            DrawText("ВАШ ХОД", 50, WINDOW_HEIGHT - 30, 20, RED);
+        }
+        else
+        {
+            DrawText("ХОД БОТА...", 50, WINDOW_HEIGHT - 30, 20, ORANGE);
+        }
+    }
+    EndDrawing();
+}
 void GameLoop()
 {
     std::vector<int> shipSizes = { 4, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
     int shipIndex = 0;
-    Dot MouseDot;
     FIELD::Directions dir = FIELD::Directions::RIGHT;
     GameState game;
-    std::vector<Ship> ships (shipSizes.size());
+    std::vector<Ship> playerShips;
 
+    SmartBot smartBot;
+    game.bot = &smartBot;
+
+    PlaceBotShips(game.botField);
+
+    //расстановка
     while (!WindowShouldClose() && game.placingShips)
     {
-        //расстановка кораблей
         if (shipIndex >= (int)shipSizes.size())
         {
             game.placingShips = false;
+            game.message = "Корабли расставлены! Ваш ход!";
             continue;
         }
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-            dir = (dir == FIELD::Directions::RIGHT) ? FIELD::Directions::DOWN : FIELD::Directions::RIGHT;
-
+        {
+            if (dir == FIELD::Directions::RIGHT)
+            {
+                dir = FIELD::Directions::DOWN;
+            }
+            else
+            {
+                dir = FIELD::Directions::RIGHT;
+            }
+        }
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             Dot start = GetMouseCell(50, 50);
-            if (start.first == -1)
+            if (start.first != -1)
             {
-                continue;
+                Ship newShip(shipSizes[shipIndex], start, FIELD::dirs[dir]);
+                if (PlaceShipOnField(game.playerField, newShip))
+                {
+                    playerShips.push_back(newShip);
+                    shipIndex = shipIndex + 1;
+                }
             }
-            Ship newShip(shipSizes[shipIndex], start, FIELD::dirs[dir]);
-
-            if (!PlaceShipOnField(game.playerField, newShip))
-            {
-                continue;
-            }
-            ships[shipIndex] = newShip;
-            shipIndex++;
         }
+        DrawPlacementPhase(game.playerField, shipIndex, (int)shipSizes.size(), dir, shipSizes);
     }
+
+    if (WindowShouldClose())
+    {
+        return;
+    }
+
+    //игра
     while (!WindowShouldClose() && !game.gameOver)
     {
-        //ход игрока
-
         if (game.isPlayerTurn)
         {
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                Dot shot = GetMouseCell(50 + BOARD_SIZE * CELL_SIZE + 100, 50);
-                CELL::SHOTRESULTS shotresult;
-                CheckShot(game.botField, shot, shotresult);
-                if (shotresult == CELL::SHOTRESULTS::HIT)
-                {
-                    game.botField[shot.first][shot.second] = CELL::HITED;
-                
-                }
-                if (shotresult == CELL::SHOTRESULTS::MISS)
-                {
-                    game.botField[shot.first][shot.second] = CELL::MISSED;
-                }
-                
-                if (shotresult == CELL::SHOTRESULTS::SINK)
-                {
-                    // здесь сложнее, не только отметить потопление , но и отметить клетки вокруг, можно отдельно выдать функцию
-                }
+                ProcessPlayerShot(game);
             }
         }
-        if (game.isPlayerTurn)
+        else
         {
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-            {
-                Dot shot = GetMouseCell(50 + BOARD_SIZE * CELL_SIZE + 100, 50);
-                if (shot.first != -1)  // проверка, что кликнули по полю
-                {
-                    // проверка, не стреляли ли уже в эту клетку
-                    int cell = game.botField[shot.first][shot.second];
-                    if (cell != CELL::HITED && cell != CELL::MISSED && cell != CELL::SINKED)
-                    {
-                        CELL::SHOTRESULTS shotresult;
-                        bool hit = CheckShot(game.botField, shot, shotresult);
-
-                        if (shotresult == CELL::SHOTRESULTS::HIT)
-                        {
-                            game.botField[shot.first][shot.second] = CELL::HITED;
-                            game.message = "ПОПАДАНИЕ! Еще ход!";
-
-                            // проверка победы
-                            bool win = true;
-                            for (int i = 0; i < BOARD_SIZE && win; i++)
-                            {
-                                for (int j = 0; j < BOARD_SIZE && win; j++)
-                                {
-                                    if (game.botField[i][j] == CELL::PLACED)
-                                    {
-                                        win = false;
-                                    }
-                                }
-                            }
-                            if (win)
-                            {
-                                game.gameOver = true;
-                                game.message = "ВЫ ПОБЕДИЛИ!";
-                            }
-                            // игрок продолжает ход 
-                        }
-                        else if (shotresult == CELL::SHOTRESULTS::MISS)
-                        {
-                            game.botField[shot.first][shot.second] = CELL::MISSED;
-                            game.message = "ПРОМАХ! Ход бота";
-                            game.isPlayerTurn = false;
-                        }
-                    }
-                }
-            }
-            }
-        //ход бота
-        else if (!game.isPlayerTurn)
-        {
-            
+            ProcessBotShot(game, playerShips);
         }
-
-
+        DrawGamePhase(game);
     }
 }
 
+
 int main(void)
 {
-
+    srand(time(NULL));
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Морской бой");
+    GameLoop();
+    CloseWindow();
     return 0;
 }

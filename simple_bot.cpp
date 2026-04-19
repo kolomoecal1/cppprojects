@@ -1,5 +1,5 @@
 #include "simple_bot.h"
-
+#include <cstdlib>
 
 Dot SimpleBot::hit()
 {

@@ -35,20 +35,20 @@ struct GameState
     }
 };
 // прототипы
-void DrawBoard(const Field& field, int startX, int startY, bool showShips); // отрисовка поля
-void DrawGrid(int startX, int startY); // отрисовка сетки
-void DrawShips(const Field& field, int startX, int startY); // отрисовка кораблей
-void DrawHits(const Field& field, int startX, int startY); // отрисовка попаданий и промахов напримор Х и О
-Dot GetMouseCell(int startX, int startY); // по координатам мыши в какую клетку кликнули
-bool PlaceShipOnField(Field& field, const Ship& ship); //размещение
-bool IsValidPlacement(const Field& field, const Ship& ship); //можно ли вообще разместить
-void PlaceBotShips(Field& field); //размещение всех 10 кораблей для бота
-bool CheckShot(Field& field, const Dot& shot, CELL::SHOTRESULTS& result); //проверка выстрела
-void MarkSink(Field& field, const Dot& hit); // отметим клетки вокруг потопленного корабля
-void GameLoop();// основной цикл
-bool CheckVictory(const Field& field);
-bool IsShipSunk(const Field& field, const Dot& hit, const std::vector<Ship>& ships);
-void MarkShipAsSunk(Field& field, const std::vector<Ship>& ships, const Dot& hit);
+//void DrawBoard(const Field& field, int startX, int startY, bool showShips); // отрисовка поля
+//void DrawGrid(int startX, int startY); // отрисовка сетки
+//void DrawShips(const Field& field, int startX, int startY); // отрисовка кораблей
+//void DrawHits(const Field& field, int startX, int startY); // отрисовка попаданий и промахов напримор Х и О
+//Dot GetMouseCell(int startX, int startY); // по координатам мыши в какую клетку кликнули
+//bool PlaceShipOnField(Field& field, const Ship& ship); //размещение
+//bool IsValidPlacement(const Field& field, const Ship& ship); //можно ли вообще разместить
+//void PlaceBotShips(Field& field); //размещение всех 10 кораблей для бота
+//bool CheckShot(Field& field, const Dot& shot, CELL::SHOTRESULTS& result); //проверка выстрела
+//void MarkSink(Field& field, const Dot& hit); // отметим клетки вокруг потопленного корабля
+//void GameLoop();// основной цикл
+//bool CheckVictory(const Field& field);
+//bool IsShipSunk(const Field& field, const Dot& hit, const std::vector<Ship>& ships);
+//void MarkShipAsSunk(Field& field, const std::vector<Ship>& ships, const Dot& hit);
 
 
 // рисуем сетку
@@ -309,12 +309,12 @@ bool CheckVictory(const Field& field)
     return true;
 }
 
-void DrawPlacementPhase(const Field& playerField, int shipIndex, int totalShips, FIELD::Directions dir, const std::vector<int>& shipSizes)
+void DrawPlacementPhase(Font text, const Field& playerField, int shipIndex, int totalShips, FIELD::Directions dir, const std::vector<int>& shipSizes)
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    DrawText("РАССТАНОВКА КОРАБЛЕЙ", WINDOW_WIDTH / 2 - 150, 10, 20, DARKBLUE);
+    DrawTextEx(text, "РАССТАНОВКА КОРАБЛЕЙ", { WINDOW_WIDTH / 2 - 150, 10 }, 20, 5, DARKBLUE);
     DrawBoard(playerField, 50, 50, true);
 
     DrawRectangle(0, WINDOW_HEIGHT - 80, WINDOW_WIDTH, 80, LIGHTGRAY);
@@ -331,15 +331,15 @@ void DrawPlacementPhase(const Field& playerField, int shipIndex, int totalShips,
         {
             hint = "Корабль размером " + std::to_string(shipSizes[shipIndex]) + " | Направление: вниз (ПКМ для смены)";
         }
-        DrawText(hint.c_str(), 50, WINDOW_HEIGHT - 55, 20, DARKGREEN);
+        DrawTextEx(text, hint.c_str(), { 50, WINDOW_HEIGHT - 55 }, 20, 5, DARKGREEN);
 
         std::string remaining = "Осталось кораблей: " + std::to_string(totalShips - shipIndex);
-        DrawText(remaining.c_str(), 50, WINDOW_HEIGHT - 30, 20, DARKGREEN);
+        DrawTextEx(text, remaining.c_str(), { 50, WINDOW_HEIGHT - 30 }, 20, 5, DARKGREEN);
     }
 
     EndDrawing();
 }
-void ProcessPlayerShot(GameState& game)
+void ProcessPlayerShot(Font text, GameState& game)
 {
     Dot shot = GetMouseCell(50 + BOARD_SIZE * CELL_SIZE + 100, 50);
     if (shot.first == -1)
@@ -371,7 +371,7 @@ void ProcessPlayerShot(GameState& game)
         game.isPlayerTurn = false;
     }
 }
-void ProcessBotShot(GameState& game, const std::vector<Ship>& playerShips)
+void ProcessBotShot(Font text, GameState& game, const std::vector<Ship>& playerShips)
 {
     Dot shot = game.bot->hit();
 
@@ -411,34 +411,34 @@ void ProcessBotShot(GameState& game, const std::vector<Ship>& playerShips)
         game.isPlayerTurn = true;
     }
 }
-void DrawGamePhase(const GameState& game)
+void DrawGamePhase(Font text, const GameState& game)
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    DrawText("ВАШЕ ПОЛЕ", 50, 20, 20, DARKBLUE);
-    DrawText("ПОЛЕ БОТА", 50 + BOARD_SIZE * CELL_SIZE + 100, 20, 20, DARKBLUE);
+    DrawTextEx(text, "ВАШЕ ПОЛЕ", { 50, 20 }, 20, 5, DARKBLUE);
+    DrawTextEx(text, "ПОЛЕ БОТА", { 50 + BOARD_SIZE * CELL_SIZE + 100, 20 }, 20, 5, DARKBLUE);
 
     DrawBoard(game.playerField, 50, 50, true);
     DrawBoard(game.botField, 50 + BOARD_SIZE * CELL_SIZE + 100, 50, false);
 
     DrawRectangle(0, WINDOW_HEIGHT - 80, WINDOW_WIDTH, 80, LIGHTGRAY);
-    DrawText(game.message.c_str(), 50, WINDOW_HEIGHT - 55, 25, DARKBLUE);
+    DrawTextEx(text, game.message.c_str(), { 50, WINDOW_HEIGHT - 55 }, 25, 5, DARKBLUE);
 
     if (!game.gameOver)
     {
         if (game.isPlayerTurn)
         {
-            DrawText("ВАШ ХОД", 50, WINDOW_HEIGHT - 30, 20, RED);
+            DrawTextEx(text, "ВАШ ХОД", { 50, WINDOW_HEIGHT - 30 }, 20, 5, RED);
         }
         else
         {
-            DrawText("ХОД БОТА...", 50, WINDOW_HEIGHT - 30, 20, ORANGE);
+            DrawTextEx(text, "ХОД БОТА...", { 50, WINDOW_HEIGHT - 30 }, 20, 5, ORANGE);
         }
     }
     EndDrawing();
 }
-void GameLoop()
+void GameLoop(Font text)
 {
     std::vector<int> shipSizes = { 4, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
     int shipIndex = 0;
@@ -484,7 +484,7 @@ void GameLoop()
                 }
             }
         }
-        DrawPlacementPhase(game.playerField, shipIndex, (int)shipSizes.size(), dir, shipSizes);
+        DrawPlacementPhase(text, game.playerField, shipIndex, (int)shipSizes.size(), dir, shipSizes);
     }
 
     if (WindowShouldClose())
@@ -499,23 +499,38 @@ void GameLoop()
         {
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                ProcessPlayerShot(game);
+                ProcessPlayerShot(text, game);
             }
         }
         else
         {
-            ProcessBotShot(game, playerShips);
+            ProcessBotShot(text, game, playerShips);
         }
-        DrawGamePhase(game);
+        DrawGamePhase(text, game);
     }
 }
+Font InitRussianFont(const char* fontPath, int fontSize) {
+    int charsCount = 0;
+    // Загружаем все русские буквы, цифры и знаки препинания
+    int* chars = LoadCodepoints(
+        "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+        "0123456789"
+        ".,!?-+()[]{}:;/\\\"'`~@#$%^&*=_|<> ",
+        &charsCount
+    );
 
+    Font font = LoadFontEx(fontPath, fontSize, chars, charsCount);
+    UnloadCodepoints(chars);
+    return font;
+}
 
 int main(void)
 {
     srand(time(NULL));
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Морской бой");
-    GameLoop();
+    Font text = InitRussianFont("C:/Windows/Fonts/Arial.ttf", 32);
+    std::cout << text.texture.id;
+    GameLoop(text);
     CloseWindow();
     return 0;
 }

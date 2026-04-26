@@ -438,7 +438,50 @@ void DrawGamePhase(Font text, const GameState& game)
     }
     EndDrawing();
 }
-void GameLoop(Font text)
+
+int ShowBotSelectionMenu(Font text)
+{
+    int selectedBot = 0;  // 0 - Simple, 1 - Smart
+
+    while (!WindowShouldClose())
+    {
+        if (IsKeyPressed(KEY_DOWN))
+        {
+            selectedBot = (selectedBot + 1) % 2;
+        }
+        if (IsKeyPressed(KEY_UP))
+        {
+            selectedBot = (selectedBot + 1) % 2;
+        }
+        if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE))
+        {
+            return selectedBot;
+        }
+
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        DrawTextEx(text, "ВЫБЕРИТЕ ПРОТИВНИКА", { (float)(WINDOW_WIDTH / 2 - 200), 100 }, 40, 5, DARKBLUE);
+
+        //простой бот
+        Color simpleColor = (selectedBot == 0) ? RED : DARKGRAY;
+        DrawTextEx(text, "> ПРОСТОЙ БОТ", { (float)(WINDOW_WIDTH / 2 - 150), 200 }, 30, 5, simpleColor);
+        DrawTextEx(text, "   Стреляет случайным образом", { (float)(WINDOW_WIDTH / 2 - 150), 240 }, 20, 5, GRAY);
+
+        //умный бот
+        Color smartColor = (selectedBot == 1) ? RED : DARKGRAY;
+        DrawTextEx(text, "> УМНЫЙ БОТ", { (float)(WINDOW_WIDTH / 2 - 150), 320 }, 30, 5, smartColor);
+        DrawTextEx(text, "   Анализирует попадания и добивает корабли", { (float)(WINDOW_WIDTH / 2 - 150), 360 }, 20, 5, GRAY);
+
+        DrawTextEx(text, "Используйте СТРЕЛКИ ВВЕРХ/ВНИЗ и ЭНТЕР для выбора",
+            { (float)(WINDOW_WIDTH / 2 - 350), 500 }, 20, 5, DARKGRAY);
+
+        EndDrawing();
+    }
+
+    return 0;
+}
+void GameLoop(Font text, int botType)
 {
     std::vector<int> shipSizes = { 4, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
     int shipIndex = 0;
@@ -446,8 +489,20 @@ void GameLoop(Font text)
     GameState game;
     std::vector<Ship> playerShips;
 
+    Bot* bot = NULL;
+    SimpleBot simpleBot;
     SmartBot smartBot;
-    game.bot = &smartBot;
+
+    if (botType == 0)
+    {
+        bot = &simpleBot;
+    }
+    else
+    {
+        bot = &smartBot;
+    }
+
+    game.bot = bot;
 
     PlaceBotShips(game.botField);
 
@@ -513,7 +568,7 @@ Font InitRussianFont(const char* fontPath, int fontSize) {
     int charsCount = 0;
     // Загружаем все русские буквы, цифры и знаки препинания
     int* chars = LoadCodepoints(
-        "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+        "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя" 
         "0123456789"
         ".,!?-+()[]{}:;/\\\"'`~@#$%^&*=_|<> ",
         &charsCount
@@ -529,8 +584,8 @@ int main(void)
     srand(time(NULL));
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Морской бой");
     Font text = InitRussianFont("C:/Windows/Fonts/Arial.ttf", 32);
-    std::cout << text.texture.id;
-    GameLoop(text);
+    int botType = ShowBotSelectionMenu(text);
+    GameLoop(text, botType);
     CloseWindow();
     return 0;
 }

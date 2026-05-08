@@ -1,32 +1,42 @@
 #pragma once
 #include "bot.h"
+#include <vector>
+#include <set>
 
-class SmartBot : public Bot 
+class SmartBot : public Bot
 {
 private:
-    enum class State 
-	{
-        RANDOM,          
-        HIT,              
+    enum class State
+    {
+        RANDOM,          // Случайные выстрелы
+        HUNTING,         // Охота вокруг последнего попадания
+        LINE             // Стрельба по линии (после второго попадания)
     };
+
+    State state;
+    Dot lastHit;           // последнее попадание
+    Dot firstHit;          // первое попадание в текущем корабле
+    Dir currentDir;        // текущее направление поиска
+    std::set<std::pair<int, int>> availableShots;  // доступные для выстрела клетки
+    std::set<std::pair<int, int>> possibleTargets;  // потенциальные цели (для режима HUNTING)
     
-    State state = State::RANDOM;
-    Dot lastHit;                 
-    Dir currentDir;             
-    std::vector<Dot> task;
-    
-    
+    void initAvailableShots();
+    bool isAlreadyShot(int row, int col) const;
+
 public:
     SmartBot();
+    ~SmartBot();
+
     Dot hit() override;
+    void setResults(CELL::SHOTRESULTS result) override;
     void reset();
-    void setResult(CELL::SHOTRESULTS result, const Dot& shot);
-    void reset();
-    
+
 private:
-    Dot randomShot(); //генерим случ коорд 
-    Dot searchAround(const Dot& dot); //ищет случайную неиспольз. клетку из четырех вокруг той, в которой попали по кораблю
-    void updateStateAfterMiss(); // обновить бот после промаха, снова рандом. или если он попал а вотрой раз не попал, должен следующий раз сменить направление выстрела
-    void updateStateAfterHit(const Dot& hit); // что делаем после попадания, стратегия след выстрела
-    Dot getNextDirection(); // возвращает следующее направление по кругу вверх - вправо - вниз - влево
+    void addNeighborsToPossibleTargets(const Dot& dot);
+    void updatePossibleTargetsAfterMiss(const Dot& shot);
+    void clearPossibleTargets();
+    Dot getRandomShot();
+    Dot getNextHuntingShot();
+    Dot getNextLineShot();
+    void removeShotFromSets(int row, int col);
 };

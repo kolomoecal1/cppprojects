@@ -4,15 +4,15 @@
 typedef std::pair<int, int> Dot;
 typedef std::pair<int, int> Dir;
 typedef std::vector<std::vector<int>> Field;
-
+//typedef std::vector<std::pair<int, int>> Ship;
 
 namespace CELL {
 	enum SHOTRESULTS
 	{
-		INVALID, // в ту же клетку, за пределы поля и тд
-		MISS, // не попали по кораблю
-		HIT, // попали
-		SINK, //потопили
+		INVALID, 
+		MISS, 
+		HIT, 
+		SINK, 
 	};
 	enum CELL
 	{
@@ -33,12 +33,7 @@ namespace FIELD {
 		COUNT
 	};
 
-	Dir dirs[] = {
-		{-1, 0},
-		{0, 1},
-		{1, 0},
-		{0, -1}
-	};
+	extern Dir dirs[4];
 
 	const int SIZE = 10;
 }

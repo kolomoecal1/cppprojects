@@ -371,46 +371,46 @@ void ProcessPlayerShot(Font text, GameState& game)
         game.isPlayerTurn = false;
     }
 }
+
 void ProcessBotShot(Font text, GameState& game, const std::vector<Ship>& playerShips)
 {
-    Dot shot = game.bot->hit();
-
-    if (shot.first == -1)
-    {
-        return;
+    // Перед вызовом game.bot->hit()
+    if (!game.gameOver) {
+        double startTime = GetTime();
+        while (GetTime() - startTime < 0.5) { /* Ждем полсекунды */ }
     }
+    
+    Dot shot = game.bot->hit();
+    if (shot.first == -1) return;
 
     CELL::SHOTRESULTS shotresult;
     bool hit = CheckShot(game.playerField, shot, shotresult);
 
+    // ПРОВЕРКА: Если попали, проверяем, не потоплен ли корабль целиком
+    if (hit && IsShipSunk(game.playerField, shot, playerShips))
+    {
+        shotresult = CELL::SINK; // Убеждаемся, что бот получит именно SINK
+        MarkShipAsSunk(game.playerField, playerShips, shot);
+        game.message = "БОТ ПОТОПИЛ КОРАБЛЬ!";
+    }
+
+    // Передаем результат боту (теперь он точно переключит состояние)
     game.bot->setResults(shotresult);
 
     if (hit)
     {
-        game.message = "БОТ ПОПАЛ!";
-
-        if (IsShipSunk(game.playerField, shot, playerShips))
-        {
-            MarkShipAsSunk(game.playerField, playerShips, shot);
-            game.message = "БОТ ПОТОПИЛ КОРАБЛЬ! ";
-        }
-
         if (CheckVictory(game.playerField))
         {
             game.gameOver = true;
             game.message = "БОТ ПОБЕДИЛ!";
         }
-        else
-        {
-            game.message = game.message + "Он стреляет еще раз";
-        }
     }
     else
     {
-        game.message = "БОТ ПРОМАХНУЛСЯ! Ваш ход";
         game.isPlayerTurn = true;
     }
 }
+
 void DrawGamePhase(Font text, const GameState& game)
 {
     BeginDrawing();

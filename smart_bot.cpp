@@ -142,138 +142,75 @@ Dot SmartBot::hit()
     
     switch (state)
     {
-    case State::RANDOM:  result = getRandomShot(); break;
-    case State::HUNTING: result = getNextHuntingShot(); break;
-    case State::LINE:    result = getNextLineShot(); break;
+    case State::RANDOM:
+        result = getRandomShot();
+        break;
+        
+    case State::HUNTING:
+        result = getNextHuntingShot();
+        break;
+        
+    case State::LINE:
+        result = getNextLineShot();
+        break;
     }
     
-    lastHit = result; // КРИТИЧНО: запоминаем, куда стрельнули
+    // ОБЯЗАТЕЛЬНО: сохраняем выстрел, чтобы setResults мог его обработать
+    lastHit = result; 
     return result;
 }
 
 
+
 void SmartBot::setResults(CELL::SHOTRESULTS result)
 {
-    if (lastHit.first == -1 && lastHit.second == -1)
-    {
-        // Если lastHit не установлен, не обрабатываем
-        return;
-    }
-    
+    if (lastHit.first == -1 || lastHit.second == -1) return;
+
     switch (result)
     {
     case CELL::HIT:
+        if (state == State::RANDOM)
         {
-            if (state == State::RANDOM)
-            {
-                // Первое попадание - переходим в режим охоты
-                state = State::HUNTING;
-                firstHit = lastHit;
-                addNeighborsToPossibleTargets(lastHit);
-            }
-            else if (state == State::HUNTING)
-            {
-                // Второе попадание - определяем направление и переходим в линейный режим
-                state = State::LINE;
-                currentDir.first = lastHit.first - firstHit.first;
-                currentDir.second = lastHit.second - firstHit.second;
-                // Нормализуем направление
-                if (currentDir.first != 0) currentDir.first = (currentDir.first > 0) ? 1 : -1;
-                if (currentDir.second != 0) currentDir.second = (currentDir.second > 0) ? 1 : -1;
-                
-                // Добавляем соседей в направлении
-                int nextX = lastHit.first + currentDir.first;
-                int nextY = lastHit.second + currentDir.second;
-                if (nextX >= 0 && nextX < FIELD::SIZE && 
-                    nextY >= 0 && nextY < FIELD::SIZE &&
-                    !isAlreadyShot(nextX, nextY))
-                {
-                    possibleTargets.insert({nextX, nextY});
-                }
-            }
-            else if (state == State::LINE)
-            {
-                // Продолжаем по линии
-                int nextX = lastHit.first + currentDir.first;
-                int nextY = lastHit.second + currentDir.second;
-                if (nextX >= 0 && nextX < FIELD::SIZE && 
-                    nextY >= 0 && nextY < FIELD::SIZE &&
-                    !isAlreadyShot(nextX, nextY))
-                {
-                    possibleTargets.clear();
-                    possibleTargets.insert({nextX, nextY});
-                }
-                else
-                {
-                    // Пробуем противоположное направление
-                    Dir oppositeDir = {-currentDir.first, -currentDir.second};
-                    nextX = firstHit.first + oppositeDir.first;
-                    nextY = firstHit.second + oppositeDir.second;
-                    if (nextX >= 0 && nextX < FIELD::SIZE && 
-                        nextY >= 0 && nextY < FIELD::SIZE &&
-                        !isAlreadyShot(nextX, nextY))
-                    {
-                        currentDir = oppositeDir;
-                        possibleTargets.clear();
-                        possibleTargets.insert({nextX, nextY});
-                    }
-                    else
-                    {
-                        // Корабль потоплен (должен быть SINK, но на всякий случай)
-                        state = State::RANDOM;
-                        clearPossibleTargets();
-                    }
-                }
-            }
+            state = State::HUNTING;
+            firstHit = lastHit;
+            addNeighborsToPossibleTargets(lastHit);
+        }
+        else if (state == State::HUNTING)
+        {
+            state = State::LINE;
+            // Определяем направление
+            currentDir.first = lastHit.first - firstHit.first;
+            currentDir.second = lastHit.second - firstHit.second;
+            // Нормализуем (чтобы значения были 1, -1 или 0)
+            if (currentDir.first != 0) currentDir.first /= std::abs(currentDir.first);
+            if (currentDir.second != 0) currentDir.second /= std::abs(currentDir.second);
+            
+            clearPossibleTargets();
         }
         break;
 
-    case CELL::SINK:
-        // Корабль потоплен - сбрасываем всё и ищем новый
-        reset();
+    case CELL::SINK: // Или CELL::SUNK, проверьте ваш enum
+        reset(); // Корабль убит, всё очищаем
         break;
 
     case CELL::MISS:
+        if (state == State::LINE)
         {
-            if (state == State::HUNTING)
-            {
-                // Удаляем этот промах из возможных целей
-                possibleTargets.erase({lastHit.first, lastHit.second});
-                if (possibleTargets.empty())
-                {
-                    // Нет больше целей - возвращаемся к случайным
-                    state = State::RANDOM;
-                }
-            }
-            else if (state == State::LINE)
-            {
-                // Промах по линии - пробуем противоположное направление
-                Dir oppositeDir = {-currentDir.first, -currentDir.second};
-                int newX = firstHit.first + oppositeDir.first;
-                int newY = firstHit.second + oppositeDir.second;
-                
-                if (newX >= 0 && newX < FIELD::SIZE && 
-                    newY >= 0 && newY < FIELD::SIZE &&
-                    !isAlreadyShot(newX, newY))
-                {
-                    currentDir = oppositeDir;
-                    possibleTargets.clear();
-                    possibleTargets.insert({newX, newY});
-                }
-                else
-                {
-                    // Нет вариантов - возвращаемся к случайным
-                    state = State::RANDOM;
-                    clearPossibleTargets();
-                }
-            }
+            // Если промахнулись в режиме линии, нужно развернуться.
+            // Следующий выстрел в getNextLineShot пойдет от firstHit в обратную сторону.
+            currentDir.first = -currentDir.first;
+            currentDir.second = -currentDir.second;
+            lastHit = firstHit; 
         }
-        break;
-
-    default:
+        else if (state == State::HUNTING)
+        {
+            possibleTargets.erase({lastHit.first, lastHit.second});
+            if (possibleTargets.empty()) state = State::RANDOM;
+        }
         break;
     }
 }
+
 
 void SmartBot::reset()
 {

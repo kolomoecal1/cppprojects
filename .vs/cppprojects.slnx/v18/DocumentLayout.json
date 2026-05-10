@@ -3,16 +3,16 @@
   "WorkspaceRootPath": "C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\my_types.h||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:my_types.h||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\.vs\\VSWorkspaceState.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.vs\\VSWorkspaceState.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\main.cpp||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:main.cpp||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\arial.ttf||{25834150-CD7E-11D0-92DF-00A0C9138C45}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:arial.ttf||{25834150-CD7E-11D0-92DF-00A0C9138C45}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\smart_bot.cpp||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:smart_bot.cpp||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -27,14 +27,31 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "my_types.h",
-              "DocumentMoniker": "C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\my_types.h",
-              "RelativeDocumentMoniker": "my_types.h",
-              "ToolTip": "C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\my_types.h",
-              "RelativeToolTip": "my_types.h",
+              "Title": "VSWorkspaceState.json",
+              "DocumentMoniker": "C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\.vs\\VSWorkspaceState.json",
+              "RelativeDocumentMoniker": ".vs\\VSWorkspaceState.json",
+              "ToolTip": "C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\.vs\\VSWorkspaceState.json",
+              "RelativeToolTip": ".vs\\VSWorkspaceState.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-05-10T09:47:55.936Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{c6f34f0d-7ae5-4f3a-be61-fe0c21ae9eb8}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "smart_bot.cpp",
+              "DocumentMoniker": "C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\smart_bot.cpp",
+              "RelativeDocumentMoniker": "smart_bot.cpp",
+              "ToolTip": "C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\smart_bot.cpp",
+              "RelativeToolTip": "smart_bot.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-05-08T16:35:12.354Z",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-05-10T09:39:17.204Z",
               "EditorCaption": ""
             },
             {
@@ -45,21 +62,10 @@
               "RelativeDocumentMoniker": "main.cpp",
               "ToolTip": "C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\main.cpp",
               "RelativeToolTip": "main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAIYAAAAAAAAAAAAAAIkAAAATAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-05-08T16:34:50.491Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "arial.ttf",
-              "DocumentMoniker": "C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\arial.ttf",
-              "RelativeDocumentMoniker": "arial.ttf",
-              "ToolTip": "C:\\Repositories\\\u043F\u0440\u043E\u0435\u043A\u0442_\u043F\u043E_\u0438\u043D\u0444\u0435\\cppprojects\\arial.ttf",
-              "RelativeToolTip": "arial.ttf",
-              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAKhSURBVDhPzVTNbtNAEP5mbcexnZISlIr0F9pE7aGolaAH3qAHbpwrKg68TST6Bty5ckF9gJZLhMSlapCoQokgSRFJndSxvTscYruOC5W48VmjXc/sfPOzP7SwsKDpug4iwr\u002BAiMDMqtfrseu6EyUzU71er1er1apt23bW6RYQAHJdN2g0Gu8ODw/fHx8fNwFAX19f39ze3touFGZmsl63gADA8zxVLpfvmaZZJKK3R0dHp9r\u002B/v7LxcWlZcdxHD0NTdN13ZjMoyEL0zQNwzDuW5ZVsixLdbvdlra3t/eiUqnM53I5cyoH5qnfNOJ\u002BCyHgeR6ZpjlXLpcfOI7zXaQXMvO1AOD4i3R/QqlUwvLysqjVapWdnZ1XgpkhpZwiU0rdkLQ\u002BvZaIIIQgwzCEZVm2yJJIKRGGEr8ufQyvAkgpI12YBFZKAVFFiFpARCSEoIQwliBUGAxDfG6N0Ol5CZGUcirTrF9MPJWhlBJBKNHujPHh0wDN1gjeOExsabJ0gHS2yabERt8P8eNigGbLxcfTAZqt4Y2Moh2bIoohOCIDgMEwwLfOGLoAHIvwpX2Fxsllkk0yKgnFmSAxoa7rPAnEGI1CdH9eoWARNlYMQANO2z4uBj5CebNvWUJmQOiaBmbGOJAYjUOM/RDFgobNtTyW5vMIiHB\u002B4SMIp4/QNBFH94Ah4mZfDqUa\u002BlA5x0TxjoVyycJWzcHGQ4s7I5ahUkldWcJICwAQfhCAmVGw0F6ZM74\u002BWrGQMwgF28DjqoNnT4r9p2v2iZ3Tg5T3X0GvDw7erK2ububzeVZKMTNmki2cYAzAJaK7RCSICILE5DALghCTued53tnZ2Tnt7u4\u002Bn52dnTMMIxf3YlJK5jiI62tPRCBQ9IhNbEEQhP1\u002Bv3/t8b/iN07yChnCZL/eAAAAAElFTkSuQmCC",
-              "WhenOpened": "2026-05-08T16:34:42.034Z"
             }
           ]
         }

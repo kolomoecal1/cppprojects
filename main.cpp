@@ -182,7 +182,7 @@ std::vector<Ship> PlaceBotShips(Field& field)
             int row = rand() % BOARD_SIZE;
             int col = rand() % BOARD_SIZE;
 
-            Ship ship(size, Dot{ row, col }, FIELD::dirs[direction]);
+            Ship ship(size, Dot{row, col}, FIELD::dirs[direction]);
 
             if (IsValidPlacement(field, ship))
             {
@@ -363,7 +363,7 @@ void ProcessPlayerShot(Font text, GameState& game)
     if (hit)
     {
         game.message = "ПОПАДАНИЕ! Еще ход!";
-
+        
         // --- НОВЫЙ БЛОК: Проверяем, убит ли корабль бота ---
         if (IsShipSunk(game.botField, shot, game.botShips))
         {
@@ -517,7 +517,7 @@ void GameLoop(Font text, int botType)
 
     game.bot = bot;
 
-    game.botShips = PlaceBotShips(game.botField);
+    game.botShips = PlaceBotShips(game.botField); 
 
     //расстановка
     while (!WindowShouldClose() && game.placingShips)

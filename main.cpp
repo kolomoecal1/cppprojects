@@ -9,11 +9,15 @@
 #include "smart_bot.h"
 #include "my_types.h"
 #include "ship.h"
+
 const int CELL_SIZE = 50;
 const int BOARD_SIZE = 10;
 const int WINDOW_WIDTH = BOARD_SIZE * CELL_SIZE * 2 + 200;
 const int WINDOW_HEIGHT = BOARD_SIZE * CELL_SIZE + 150;
+Color lightBlue = { 135, 206, 250, 255 };
+Color lightGreen = { 144, 238, 144, 255 };
 
+const char* BACKGROUND_IMAGE_PATH = "C:\Repositories\cppprojects_my\img.png";
 struct GameState
 {
     Field playerField;
@@ -33,7 +37,7 @@ struct GameState
         placingShips = true;
         isPlayerTurn = true;
         gameOver = false;
-        message = "Ходи!";
+        message = "Ходите!";
     }
 };
 // прототипы
@@ -324,10 +328,10 @@ void DrawPlacementPhase(Font text, const Field& playerField, int shipIndex, int 
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    DrawTextEx(text, "РАССТАНОВКА КОРАБЛЕЙ", { WINDOW_WIDTH / 2 - 150, 10 }, 20, 5, DARKBLUE);
+    DrawTextEx(text, "РАССТАНОВКА КОРАБЛЕЙ", { WINDOW_WIDTH / 2 - 150, 10 }, 20, 5, RED);
     DrawBoard(playerField, 50, 50, true);
 
-    DrawRectangle(0, WINDOW_HEIGHT - 100, WINDOW_WIDTH, 100, LIGHTGRAY);
+    DrawRectangle(0, WINDOW_HEIGHT - 100, WINDOW_WIDTH, 100, lightBlue);
     if (shipIndex < totalShips)
     {
         std::string hint;
@@ -340,10 +344,10 @@ void DrawPlacementPhase(Font text, const Field& playerField, int shipIndex, int 
         {
             hint = "Корабль размером " + std::to_string(shipSizes[shipIndex]) + " | Направление: вниз (ПКМ для смены)";
         }
-        DrawTextEx(text, hint.c_str(), { 50, (float)WINDOW_HEIGHT - 70 }, 20, 5, DARKGREEN);
+        DrawTextEx(text, hint.c_str(), { 50, (float)WINDOW_HEIGHT - 70 }, 20, 5, BLACK);
 
         std::string remaining = "Осталось кораблей: " + std::to_string(totalShips - shipIndex);
-        DrawTextEx(text, remaining.c_str(), { 50, (float)WINDOW_HEIGHT - 40 }, 20, 5, DARKGREEN);
+        DrawTextEx(text, remaining.c_str(), { 50, (float)WINDOW_HEIGHT - 40 }, 20, 5, BLACK);
     }
 
     EndDrawing();
@@ -390,7 +394,7 @@ void ProcessBotShot(Font text, GameState& game, const std::vector<Ship>& playerS
     // Перед вызовом game.bot->hit()
     if (!game.gameOver) {
         double startTime = GetTime();
-        while (GetTime() - startTime < 0.5) { /* Ждем полсекунды */ }
+        while (GetTime() - startTime < 1) { /* Ждем полсекунды */ }
     }
 
     Dot shot = game.bot->hit();
@@ -451,49 +455,68 @@ void DrawGamePhase(Font text, const GameState& game)
     }
     EndDrawing();
 }
-
 int ShowBotSelectionMenu(Font text)
 {
-    int selectedBot = 0;  // 0 - Simple, 1 - Smart
+    // ИСПРАВЛЕННЫЙ ПУТЬ - используем прямые слеши
+    Texture2D background = LoadTexture("C:/Repositories/cppprojects_my/img.png");
+
+
+    int selectedBot = 0;
 
     while (!WindowShouldClose())
     {
-        if (IsKeyPressed(KEY_DOWN))
-        {
-            selectedBot = (selectedBot + 1) % 2;
-        }
-        if (IsKeyPressed(KEY_UP))
+        if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_UP))
         {
             selectedBot = (selectedBot + 1) % 2;
         }
         if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE))
         {
+            if (background.id != 0) UnloadTexture(background);
             return selectedBot;
         }
 
         BeginDrawing();
-        ClearBackground(RAYWHITE);
 
-        DrawTextEx(text, "ВЫБЕРИТЕ ПРОТИВНИКА", { (float)(WINDOW_WIDTH / 2 - 200), 100 }, 40, 5, DARKBLUE);
+        // Рисуем фон только если он загрузился
+        if (background.id != 0) {
+            DrawTexturePro(
+                background,
+                { 0, 0, (float)background.width, (float)background.height },
+                { 0, 0, (float)WINDOW_WIDTH, (float)WINDOW_HEIGHT },
+                { 0, 0 },
+                0.0f,
+                WHITE
+            );
+        }
+        else {
+            ClearBackground(DARKBLUE); // Запасной вариант
+        }
 
-        //простой бот
-        Color simpleColor = (selectedBot == 0) ? RED : DARKGRAY;
+        DrawRectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Fade(BLACK, 0.3f));
+
+        // ... остальной код без изменений
+        const char* title = "ВЫБЕРИТЕ ПРОТИВНИКА";
+        Vector2 titleSize = MeasureTextEx(text, title, 50, 5); // 50 - размер шрифта, 5 - spacing
+        DrawTextEx(text, title, { (float)(WINDOW_WIDTH - titleSize.x) / 2, 100 }, 50, 5, RAYWHITE);
+
+        Color simpleColor = (selectedBot == 0) ? YELLOW : RAYWHITE;
         DrawTextEx(text, "> ПРОСТОЙ БОТ", { (float)(WINDOW_WIDTH / 2 - 150), 200 }, 30, 5, simpleColor);
-        DrawTextEx(text, "   Стреляет случайным образом", { (float)(WINDOW_WIDTH / 2 - 150), 240 }, 20, 5, GRAY);
+        DrawTextEx(text, "   Стреляет случайным образом", { (float)(WINDOW_WIDTH / 2 - 150), 240 }, 20, 5, LIGHTGRAY);
 
-        //умный бот
-        Color smartColor = (selectedBot == 1) ? RED : DARKGRAY;
+        Color smartColor = (selectedBot == 1) ? YELLOW : RAYWHITE;
         DrawTextEx(text, "> УМНЫЙ БОТ", { (float)(WINDOW_WIDTH / 2 - 150), 320 }, 30, 5, smartColor);
-        DrawTextEx(text, "   Анализирует попадания и добивает корабли", { (float)(WINDOW_WIDTH / 2 - 150), 360 }, 20, 5, GRAY);
+        DrawTextEx(text, "   Анализирует попадания и добивает корабли", { (float)(WINDOW_WIDTH / 2 - 150), 360 }, 20, 5, LIGHTGRAY);
 
         DrawTextEx(text, "Используйте СТРЕЛКИ ВВЕРХ/ВНИЗ и ЭНТЕР для выбора",
-            { (float)(WINDOW_WIDTH / 2 - 350), 500 }, 20, 5, DARKGRAY);
+            { (float)(WINDOW_WIDTH / 2 - 350), 500 }, 20, 5, RAYWHITE);
 
         EndDrawing();
     }
 
+    if (background.id != 0) UnloadTexture(background);
     return 0;
 }
+
 void GameLoop(Font text, int botType)
 {
     std::vector<int> shipSizes = { 4, 3, 3, 2, 2, 2, 1, 1, 1, 1 };
@@ -525,7 +548,7 @@ void GameLoop(Font text, int botType)
         if (shipIndex >= (int)shipSizes.size())
         {
             game.placingShips = false;
-            game.message = "Корабли расставлены! Ваш ход!";
+            game.message = "Корабли расставлены! Ход за Вами!";
             continue;
         }
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
@@ -616,7 +639,7 @@ int main(void)
 {
     srand(time(NULL));
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Морской бой");
-    Font text = InitRussianFont("C:/Windows/Fonts/Arial.ttf", 32);
+    Font text = InitRussianFont("C:/Windows/Fonts/Arialbd.ttf", 64);
     int botType = ShowBotSelectionMenu(text);
     GameLoop(text, botType);
     CloseWindow();

@@ -12,7 +12,7 @@
 const int CELL_SIZE = 50;
 const int BOARD_SIZE = 10;
 const int WINDOW_WIDTH = BOARD_SIZE * CELL_SIZE * 2 + 200;
-const int WINDOW_HEIGHT = BOARD_SIZE * CELL_SIZE + 100;
+const int WINDOW_HEIGHT = BOARD_SIZE * CELL_SIZE + 150;
 
 struct GameState
 {
@@ -182,7 +182,7 @@ std::vector<Ship> PlaceBotShips(Field& field)
             int row = rand() % BOARD_SIZE;
             int col = rand() % BOARD_SIZE;
 
-            Ship ship(size, Dot{row, col}, FIELD::dirs[direction]);
+            Ship ship(size, Dot{ row, col }, FIELD::dirs[direction]);
 
             if (IsValidPlacement(field, ship))
             {
@@ -327,8 +327,7 @@ void DrawPlacementPhase(Font text, const Field& playerField, int shipIndex, int 
     DrawTextEx(text, "РАССТАНОВКА КОРАБЛЕЙ", { WINDOW_WIDTH / 2 - 150, 10 }, 20, 5, DARKBLUE);
     DrawBoard(playerField, 50, 50, true);
 
-    DrawRectangle(0, WINDOW_HEIGHT - 80, WINDOW_WIDTH, 80, LIGHTGRAY);
-
+    DrawRectangle(0, WINDOW_HEIGHT - 100, WINDOW_WIDTH, 100, LIGHTGRAY);
     if (shipIndex < totalShips)
     {
         std::string hint;
@@ -341,14 +340,15 @@ void DrawPlacementPhase(Font text, const Field& playerField, int shipIndex, int 
         {
             hint = "Корабль размером " + std::to_string(shipSizes[shipIndex]) + " | Направление: вниз (ПКМ для смены)";
         }
-        DrawTextEx(text, hint.c_str(), { 50, WINDOW_HEIGHT - 55 }, 20, 5, DARKGREEN);
+        DrawTextEx(text, hint.c_str(), { 50, (float)WINDOW_HEIGHT - 70 }, 20, 5, DARKGREEN);
 
         std::string remaining = "Осталось кораблей: " + std::to_string(totalShips - shipIndex);
-        DrawTextEx(text, remaining.c_str(), { 50, WINDOW_HEIGHT - 30 }, 20, 5, DARKGREEN);
+        DrawTextEx(text, remaining.c_str(), { 50, (float)WINDOW_HEIGHT - 40 }, 20, 5, DARKGREEN);
     }
 
     EndDrawing();
 }
+
 void ProcessPlayerShot(Font text, GameState& game)
 {
     Dot shot = GetMouseCell(50 + BOARD_SIZE * CELL_SIZE + 100, 50);
@@ -363,7 +363,7 @@ void ProcessPlayerShot(Font text, GameState& game)
     if (hit)
     {
         game.message = "ПОПАДАНИЕ! Еще ход!";
-        
+
         // --- НОВЫЙ БЛОК: Проверяем, убит ли корабль бота ---
         if (IsShipSunk(game.botField, shot, game.botShips))
         {
@@ -384,8 +384,6 @@ void ProcessPlayerShot(Font text, GameState& game)
         game.isPlayerTurn = false;
     }
 }
-
-
 
 void ProcessBotShot(Font text, GameState& game, const std::vector<Ship>& playerShips)
 {
@@ -437,18 +435,18 @@ void DrawGamePhase(Font text, const GameState& game)
     DrawBoard(game.playerField, 50, 50, true);
     DrawBoard(game.botField, 50 + BOARD_SIZE * CELL_SIZE + 100, 50, false);
 
-    DrawRectangle(0, WINDOW_HEIGHT - 80, WINDOW_WIDTH, 80, LIGHTGRAY);
-    DrawTextEx(text, game.message.c_str(), { 50, WINDOW_HEIGHT - 55 }, 25, 5, DARKBLUE);
+    DrawRectangle(0, WINDOW_HEIGHT - 100, WINDOW_WIDTH, 100, LIGHTGRAY);
+    DrawTextEx(text, game.message.c_str(), { 50, WINDOW_HEIGHT - 75 }, 25, 5, DARKBLUE);
 
     if (!game.gameOver)
     {
         if (game.isPlayerTurn)
         {
-            DrawTextEx(text, "ВАШ ХОД", { 50, WINDOW_HEIGHT - 30 }, 20, 5, RED);
+            DrawTextEx(text, "ВАШ ХОД", { 50, WINDOW_HEIGHT - 40 }, 20, 5, RED);
         }
         else
         {
-            DrawTextEx(text, "ХОД БОТА...", { 50, WINDOW_HEIGHT - 30 }, 20, 5, ORANGE);
+            DrawTextEx(text, "ХОД БОТА...", { 50, WINDOW_HEIGHT - 40 }, 20, 5, ORANGE);
         }
     }
     EndDrawing();
@@ -519,7 +517,7 @@ void GameLoop(Font text, int botType)
 
     game.bot = bot;
 
-    game.botShips = PlaceBotShips(game.botField); 
+    game.botShips = PlaceBotShips(game.botField);
 
     //расстановка
     while (!WindowShouldClose() && game.placingShips)
